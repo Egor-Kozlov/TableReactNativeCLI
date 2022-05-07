@@ -1,44 +1,44 @@
 import {
   ActivityIndicator,
-  StyleSheet,
-  Text,
   View,
   FlatList,
   ScrollView,
   SafeAreaView,
   RefreshControl,
-  Button,
+  Text,
 } from 'react-native';
 import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {
+  useSharedValue,
+  useAnimatedRef,
+  useDerivedValue,
+  scrollTo,
+} from 'react-native-reanimated';
+import AwesomeButton from 'react-native-really-awesome-button';
 import TableItem from './TableItem';
-import Loader from './Loader';
+import TableHeader from './TableHeader';
+import COLORS from '../../services/colors';
+import styles from './styles';
 
 const Table = ({navigation}) => {
   const [tableData, setTableData] = useState([]);
-  const [visibleTableData, setVisibleTableData] = useState([]);
   const [cursor, setCursor] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(true);
   const scrollPosition = useRef(null);
-  const [scroll, setScroll] = useState();
-  // const newScrollPosition = useRef(null);
-  const [scrollRef, setScrollRef] = useState();
 
-  // useEffect(() => {
-  //   console.log(scroll);
-  //   // newScrollPosition.scrollTo({y: 40, animated: true});
-  //   scrollRef.scrollTo({x: scroll, y: 0, animated: false});
-  // }, [scroll, scrollRef]);
+  const aref = useAnimatedRef(scrollPosition.current);
+  const scroll = useSharedValue(0);
+  useDerivedValue(() => {
+    scrollTo(aref, scroll.value, 0, false);
+  });
 
-  // https://620c0082b573632593845707.mockapi.io/table
   useEffect(() => {
     loadTableItems();
   }, [loadTableItems]);
 
   const loadTableItems = useCallback(() => {
     setIsLoading(true);
-    console.log('load');
-    console.log('cursor', cursor);
     fetch(`https://callbook-core.herokuapp.com/v1/records?cursor=${cursor}`)
       .then(response => response.json())
       .then(json => {
@@ -51,54 +51,34 @@ const Table = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Button
-        onPress={() => {
-          console.log(scrollPosition.current);
-          // console.log(newScrollPosition);
-          // newScrollPosition.current.scrollTo({x: 40, y: 0, animated: false});
-          scrollRef.scrollTo({
-            x: scrollPosition.current,
-            y: 0,
-            animated: false,
-          });
-        }}
-        title="Sync"
-        color="#841584"
-        accessibilityLabel="Learn more about this purple button"
-      />
       {tableData.length ? (
-        <View>
+        <>
           <ScrollView
-            style={{paddingLeft: 20}}
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={false}
+            style={styles.headerScroll}
             horizontal={true}
-            ref={ref => {
-              // newScrollPosition.current = ref;
-              setScrollRef(ref);
-            }}>
-            <TableItem />
+            ref={aref}>
+            <TableHeader />
           </ScrollView>
           <ScrollView
             style={styles.tableContainer}
             horizontal={true}
             onScroll={e => {
-              // setScroll(e.nativeEvent.contentOffset.x);
-              scrollPosition.current = e.nativeEvent.contentOffset.x;
+              scroll.value = e.nativeEvent.contentOffset.x;
             }}>
             <FlatList
+              scrollEnabled={true}
               style={styles.listContainer}
               data={tableData}
               renderItem={TableItem}
               keyExtractor={item => item.id}
-              contentContainerStyle={{
-                padding: 20,
-                paddingBottom: 30,
-                paddingTop: 0,
-              }}
+              contentContainerStyle={styles.tableContent}
               onEndReached={() => loadTableItems(cursor)}
               refreshControl={
                 <RefreshControl
                   progressViewOffset={20}
-                  colors={['#9Bd35A', '#689F38']}
+                  colors={[COLORS.blue, COLORS.darkBlue]}
                   refreshing={refreshing}
                   onRefresh={() => {
                     setCursor('');
@@ -109,31 +89,30 @@ const Table = ({navigation}) => {
               }
             />
           </ScrollView>
-        </View>
+        </>
       ) : (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator
+          style={{paddingTop: 20}}
+          size={'large'}
+          color={COLORS.blue}
+        />
       )}
       {isLoading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={'large'} color={COLORS.blue} />
         </View>
       ) : null}
+      <AwesomeButton
+        style={styles.addButton}
+        width={80}
+        height={81}
+        borderRadius={80}
+        backgroundColor={COLORS.blue}
+        backgroundDarker={'#072947'}>
+        <Text style={styles.textAddButton}>+</Text>
+      </AwesomeButton>
     </SafeAreaView>
   );
 };
 
 export default Table;
-
-const styles = StyleSheet.create({
-  tableContainer: {},
-  listContainer: {},
-  rowContainer: {
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-  },
-  loaderContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 185,
-  },
-});
