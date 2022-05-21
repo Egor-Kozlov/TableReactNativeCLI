@@ -1,17 +1,15 @@
 import {StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
+  tableContainer: {
+    flexDirection: 'row',
+  },
   rowContainer: {
-    borderWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
   },
   tableContent: {
-    paddingLeft: 20,
     paddingBottom: 150,
     paddingTop: 0,
-  },
-  headerScroll: {
-    paddingLeft: 20,
   },
   loaderContainer: {
     position: 'absolute',
@@ -27,5 +25,20 @@ export default StyleSheet.create({
   textAddButton: {
     color: 'white',
     fontSize: 40,
+  },
+  firstColumn: {
+    width: 100,
+  },
+  firstLoadingIndicator: {
+    paddingTop: 20,
+  },
+  idSection: {
+    paddingVertical: 15,
+    paddingHorizontal: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRightWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'gray',
   },
 });

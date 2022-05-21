@@ -3,7 +3,7 @@ import React from 'react';
 
 const ItemSection = ({sectionData}) => {
   return (
-    <View style={styles.item}>
+    <View style={[styles.item]}>
       <Text style={styles.title}>{sectionData}</Text>
     </View>
   );
@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 5,
     borderWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: 0,
+    borderTopWidth: 0,
+    // borderBottomWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

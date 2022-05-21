@@ -1,18 +1,21 @@
-const postRequest = async (bodyData, url) => {
+const postRequest = async (DATA, URL) => {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(URL, {
       method: 'POST',
-      body: JSON.stringify(bodyData),
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify(DATA),
     });
-    const json = await response.json();
-    const result = JSON.stringify(json);
-    // console.log('Success:', result);
-    return JSON.parse(result);
+    const result = await response.json();
+
+    if (result) {
+      return result;
+    }
+    return null;
   } catch (error) {
-    console.error('Error:', error);
+    console.log(error);
+    return null;
   }
 };
 

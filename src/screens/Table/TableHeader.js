@@ -26,7 +26,9 @@ export default TableHeader;
 const styles = StyleSheet.create({
   rowContainer: {
     backgroundColor: 'gray',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
     flexDirection: 'row',
+    // marginLeft: 20,
   },
 });

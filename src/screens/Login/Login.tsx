@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
-  StyleSheet,
   SafeAreaView,
   Text,
   Pressable,
@@ -12,9 +11,10 @@ import {
 } from 'react-native';
 import Form from './Form/Form';
 import BottomWaveSVG from '../../../assets/pictures/bottom-wave.svg';
+import styles from './styles';
 
-const Login = ({navigation}) => {
-  const [iskKeyboardActive, setIskKeyboardActive] = useState(undefined);
+const Login: React.FC<any> = ({navigation}) => {
+  const [iskKeyboardActive, setIskKeyboardActive] = useState<boolean>(false);
   const inputAnim = useRef(new Animated.Value(0)).current;
 
   const inputActiveAnim = useCallback(() => {
@@ -91,42 +91,5 @@ const Login = ({navigation}) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    height: '100%',
-    backgroundColor: '#F8F8F8',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-  },
-  headerContainer: {
-    marginBottom: '20%',
-  },
-  title: {
-    marginLeft: '10%',
-    marginBottom: '2%',
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#07122A',
-  },
-  subtitle: {
-    marginLeft: '10%',
-    fontSize: 22,
-    fontWeight: '400',
-    color: '#4F4F4F',
-  },
-  formContainer: {
-    marginTop: '20%',
-  },
-  waveContainer: {
-    width: '100%',
-    height: 15,
-    backgroundColor: '#07122A',
-  },
-  waveSvg: {
-    position: 'absolute',
-    bottom: 10,
-  },
-});
 
 export default Login;

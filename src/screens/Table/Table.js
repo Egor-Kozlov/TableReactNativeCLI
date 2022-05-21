@@ -7,11 +7,12 @@ import {
   RefreshControl,
   Text,
 } from 'react-native';
-import React, {useState, useEffect, useCallback, useRef} from 'react';
-import {
+import React, {useState, useEffect, useCallback} from 'react';
+import Animated, {
+  useAnimatedScrollHandler,
   useSharedValue,
-  useAnimatedRef,
   useDerivedValue,
+  useAnimatedRef,
   scrollTo,
 } from 'react-native-reanimated';
 import AwesomeButton from 'react-native-really-awesome-button';
@@ -19,18 +20,21 @@ import TableItem from './TableItem';
 import TableHeader from './TableHeader';
 import COLORS from '../../services/colors';
 import styles from './styles';
+import RenderFirstColumn from './RenderFirstColumn';
 
 const Table = ({navigation}) => {
   const [tableData, setTableData] = useState([]);
   const [cursor, setCursor] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(true);
-  const scrollPosition = useRef(null);
 
-  const aref = useAnimatedRef(scrollPosition.current);
-  const scroll = useSharedValue(0);
+  const firstColumnRef = useAnimatedRef();
+  const translationY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(event => {
+    translationY.value = event.contentOffset.y;
+  });
   useDerivedValue(() => {
-    scrollTo(aref, scroll.value, 0, false);
+    scrollTo(firstColumnRef, 0, translationY.value, false);
   });
 
   useEffect(() => {
@@ -50,49 +54,54 @@ const Table = ({navigation}) => {
   }, [cursor, tableData]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView>
       {tableData.length ? (
-        <>
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            scrollEnabled={false}
-            style={styles.headerScroll}
-            horizontal={true}
-            ref={aref}>
-            <TableHeader />
-          </ScrollView>
-          <ScrollView
-            style={styles.tableContainer}
-            horizontal={true}
-            onScroll={e => {
-              scroll.value = e.nativeEvent.contentOffset.x;
-            }}>
+        <View style={styles.tableContainer}>
+          <View>
+            <View style={styles.idSection}>
+              <Text>ID</Text>
+            </View>
             <FlatList
-              scrollEnabled={true}
-              style={styles.listContainer}
+              style={styles.firstColumn}
               data={tableData}
-              renderItem={TableItem}
               keyExtractor={item => item.id}
-              contentContainerStyle={styles.tableContent}
-              onEndReached={() => loadTableItems(cursor)}
-              refreshControl={
-                <RefreshControl
-                  progressViewOffset={20}
-                  colors={[COLORS.blue, COLORS.darkBlue]}
-                  refreshing={refreshing}
-                  onRefresh={() => {
-                    setCursor('');
-                    setTableData([]);
-                    loadTableItems();
-                  }}
-                />
-              }
+              renderItem={RenderFirstColumn}
+              ref={firstColumnRef}
+              scrollEventThrottle={1}
             />
+          </View>
+          <ScrollView style={styles.tableContainer} horizontal>
+            <View>
+              <TableHeader />
+              <Animated.FlatList
+                scrollEnabled={true}
+                style={styles.listContainer}
+                data={tableData}
+                renderItem={TableItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.tableContent}
+                onEndReached={() => loadTableItems(cursor)}
+                scrollEventThrottle={1}
+                onScroll={scrollHandler}
+                refreshControl={
+                  <RefreshControl
+                    progressViewOffset={20}
+                    colors={[COLORS.blue, COLORS.darkBlue]}
+                    refreshing={refreshing}
+                    onRefresh={() => {
+                      setCursor('');
+                      setTableData([]);
+                      loadTableItems();
+                    }}
+                  />
+                }
+              />
+            </View>
           </ScrollView>
-        </>
+        </View>
       ) : (
         <ActivityIndicator
-          style={{paddingTop: 20}}
+          style={styles.firstLoadingIndicator}
           size={'large'}
           color={COLORS.blue}
         />

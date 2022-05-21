@@ -11,5 +11,8 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  errorMessage: {
+    color: 'red',
+  },
   loginButton: {},
 });

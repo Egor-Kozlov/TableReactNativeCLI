@@ -25,7 +25,7 @@ export default TableItem;
 
 const styles = StyleSheet.create({
   rowContainer: {
-    borderWidth: 1,
+    // borderWidth: 1,
     flexDirection: 'row',
   },
 });

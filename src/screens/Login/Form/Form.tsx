@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
 //redux
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {userLogin} from '../../../store/loginSlice';
 //
 import AwesomeButton from 'react-native-really-awesome-button';
@@ -12,21 +12,38 @@ import COLORS from '../../../services/colors';
 
 const LOGIN_URL = 'https://callbook-core.herokuapp.com/v1/auth/sign-in';
 
-const Form = ({navigation}) => {
+const Form: React.FC = ({navigation}) => {
   const [loginInput, setLoginInput] = useState(null);
   const [passwordInput, setPasswordInput] = useState(null);
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const dispatch = useDispatch();
-  // console.log(useSelector(state => state.loginReducer));
 
-  const loginRequest = async (inputsData, URL) => {
-    const result = await postRequest(inputsData, URL);
-    if (result) {
+  const loginTry = async (
+    DATA: object,
+    URL: string,
+    buttonEndPoint: any,
+  ): Promise<void> => {
+    const result = await postRequest(DATA, URL);
+    if (result.success === true) {
       setLoginSuccess(true);
-      dispatch(userLogin(result)); //set data to Redux
+      dispatch(userLogin(result.data)); //set data to Redux
+      setTimeout(() => {
+        console.log('loginSuccess', loginSuccess);
+        navigation.navigate('Menu');
+      }, 1200);
     }
+    if (result.success === false) {
+      setErrorMessage('Введены неверные данные');
+      console.log(result.error);
+    }
+    buttonEndPoint();
   };
+
+  useEffect(() => {
+    setErrorMessage('');
+  }, [loginInput, passwordInput]);
 
   return (
     <View style={styles.container}>
@@ -42,6 +59,13 @@ const Form = ({navigation}) => {
         state={passwordInput}
         setState={setPasswordInput}
       />
+      <Text
+        style={[
+          styles.errorMessage,
+          errorMessage ? {opacity: 1} : {opacity: 0},
+        ]}>
+        {errorMessage}
+      </Text>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           onPress={() => navigation.navigate('RegistrationWelcome')}>
@@ -58,21 +82,16 @@ const Form = ({navigation}) => {
           progress={true}
           progressLoadingTime={3000}
           onPress={async next => {
-            await loginRequest(
-              {login: loginInput, password: passwordInput},
-              LOGIN_URL,
-            );
-            next();
-            if (loginSuccess) {
-              setTimeout(() => {
-                console.log('loginSuccess', loginSuccess);
-                navigation.navigate('Menu');
-              }, 1200);
+            if (loginInput && passwordInput) {
+              await loginTry(
+                {login: loginInput, password: passwordInput},
+                LOGIN_URL,
+                next, //button function for finish loading animation
+              );
+            } else {
+              setErrorMessage('Введите логин и пароль');
+              next();
             }
-            // setTimeout(() => {
-            //   console.log('loginSuccess', loginSuccess);
-            //   navigation.navigate('Menu');
-            // }, 1200);
           }}>
           {loginSuccess ? 'Успех' : 'Войти'}
         </AwesomeButton>
